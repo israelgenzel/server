@@ -1,0 +1,8 @@
+flask
+yt-dlp
+requests
+ytmusicapi
+jsonify
+flask_cors
+mutagen
+musicbrainzngs
