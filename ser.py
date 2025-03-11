@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, render_template, send_file
+import time
+from flask import Flask, after_this_request, request, jsonify, render_template, send_file
 from flask_cors import CORS
 import requests
 from ytmusicapi import YTMusic
@@ -13,8 +14,8 @@ CORS(app)  # מאפשר גישה מכל דומיין
 yt = YTMusic()
 
 
-DOWNLOADS_FOLDER = "downloads"
-os.makedirs(DOWNLOADS_FOLDER, exist_ok=True)
+DOWNLOAD_FOLDER = "downloads"
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 @app.route("/")
 def home():
@@ -41,77 +42,47 @@ def search():
     
     return jsonify(artists_list)
 
+@app.route('/download', methods=['GET'])
+def download_video():
+    print("download_video")
+    video_url = request.args.get('url')
+    if not video_url:
+        return jsonify({"error": "Missing video URL"}), 400
 
-@app.route("/download", methods=["GET"])
-def download():
-    id = request.args.get("id")
-    filename = request.args.get("filename")
-
-    print(id,filename)
-
-    
-    output_file = os.path.join(DOWNLOADS_FOLDER, filename)
-    
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': os.path.join(DOWNLOADS_FOLDER, '%(title)s.%(ext)s'),
-    }
-
-    # ydl_opts = {
-    #     'format': 'bestaudio/best',
-    #     'outtmpl': output_file,
-    #     # 'postprocessors': [
-    #     #     {
-    #     #         'key': 'FFmpegExtractAudio',
-    #     #         'preferredcodec': 'mp3',
-    #     #         'preferredquality': '192',
-    #     #     },
-    #     #     {
-    #     #         'key': 'FFmpegMetadata',  # הוספת מטא-דאטה לקובץ ה-MP3
-    #     #         'add_metadata': True,
-                
-                
-    #     #     },
-    #     #     {
-    #     #         "key": "FFmpegThumbnailsConvertor",
-    #     #         "format": "jpg",
-    #     #         "when": "before_dl"
-    #     #     }
-    #     # ],
-    #     # 'writethumbnail': True,  # הורדת תמונת קאבר
-    #     # 'embedthumbnail': True,   # הטמעת התמונה בקובץ
-    #     # 'addmetadata': True,      # הוספת מטא-דאטה
-    #     # "ffmpeg-location": "./ffmpeg.exe",  # נתיב ל-FFmpeg
-    # }
-    url = f"https://www.youtube.com/watch?v={id}"
     try:
-       with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-         result = ydl.extract_info(url, download=False)  # לא להוריד עדיין
-         filename = ydl.prepare_filename(result)  # קבל את שם הקובץ
-         ydl.download([url])  # הורד את הקובץ
-         return send_file(filename+".mp3", as_attachment=True)
-    except:
-        return jsonify("500")
-        
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
+        }
 
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([video_url])
 
+        # מציאת הקובץ שהורד
+        downloaded_files = os.listdir(DOWNLOAD_FOLDER)
+        print(downloaded_files)
+        if not downloaded_files:
+            return jsonify({"error": "Download failed"}), 500
 
-    
-    # print(output_file)
-    # add_cover(output_file +".mp3", output_file+ ".jpg")
-    # os.remove(output_file+ ".jpg")
-    
-    for file in os.listdir(DOWNLOADS_FOLDER):
-        if file.startswith(filename + "."):  # בודק אם הקובץ מתחיל בשם הזה (ומופיעה נקודה לסיומת)
-          return send_file(file, as_attachment=True)  
-   
-    # if os.path.exists(output_file):
-    #     return send_file(output_file +".mp3", as_attachment=True)
-    # else:
-    return jsonify("500")
-    
-    # return jsonify({"message": "ההורדה הסתיימה בהצלחה!"})
+        print(f"✅ הורדה הושלמה: {downloaded_files[0]}")
+        filename = os.path.join(DOWNLOAD_FOLDER, downloaded_files[0])
 
+        # מחיקת הקובץ אחרי שליחה
+        @after_this_request
+        def cleanup(response):
+            try:
+                if os.path.exists(filename):
+                    time.sleep(1)  # חכה שנייה לוודא שהשליחה הסתיימה
+                    os.remove(filename)
+                    print(f"🗑️ קובץ נמחק: {filename}")
+            except Exception as e:
+                print(f"⚠️ שגיאה במחיקה: {e}")
+            return response
+
+        return send_file(filename, as_attachment=True)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/get_info", methods=["GET"])
 def get_info():
