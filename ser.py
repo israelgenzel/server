@@ -51,40 +51,49 @@ def download():
 
     
     output_file = os.path.join(DOWNLOADS_FOLDER, filename)
-
+    
     ydl_opts = {
         'format': 'bestaudio/best',
-        'outtmpl': output_file,
-        # 'postprocessors': [
-        #     {
-        #         'key': 'FFmpegExtractAudio',
-        #         'preferredcodec': 'mp3',
-        #         'preferredquality': '192',
-        #     },
-        #     {
-        #         'key': 'FFmpegMetadata',  # הוספת מטא-דאטה לקובץ ה-MP3
-        #         'add_metadata': True,
-                
-                
-        #     },
-        #     {
-        #         "key": "FFmpegThumbnailsConvertor",
-        #         "format": "jpg",
-        #         "when": "before_dl"
-        #     }
-        # ],
-        # 'writethumbnail': True,  # הורדת תמונת קאבר
-        # 'embedthumbnail': True,   # הטמעת התמונה בקובץ
-        # 'addmetadata': True,      # הוספת מטא-דאטה
-        # "ffmpeg-location": "./ffmpeg.exe",  # נתיב ל-FFmpeg
+        'outtmpl': os.path.join(DOWNLOADS_FOLDER, '%(title)s.%(ext)s'),
     }
+
+    # ydl_opts = {
+    #     'format': 'bestaudio/best',
+    #     'outtmpl': output_file,
+    #     # 'postprocessors': [
+    #     #     {
+    #     #         'key': 'FFmpegExtractAudio',
+    #     #         'preferredcodec': 'mp3',
+    #     #         'preferredquality': '192',
+    #     #     },
+    #     #     {
+    #     #         'key': 'FFmpegMetadata',  # הוספת מטא-דאטה לקובץ ה-MP3
+    #     #         'add_metadata': True,
+                
+                
+    #     #     },
+    #     #     {
+    #     #         "key": "FFmpegThumbnailsConvertor",
+    #     #         "format": "jpg",
+    #     #         "when": "before_dl"
+    #     #     }
+    #     # ],
+    #     # 'writethumbnail': True,  # הורדת תמונת קאבר
+    #     # 'embedthumbnail': True,   # הטמעת התמונה בקובץ
+    #     # 'addmetadata': True,      # הוספת מטא-דאטה
+    #     # "ffmpeg-location": "./ffmpeg.exe",  # נתיב ל-FFmpeg
+    # }
     url = f"https://www.youtube.com/watch?v={id}"
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])  # הורד את הקובץ
+       with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+         result = ydl.extract_info(url, download=False)  # לא להוריד עדיין
+         filename = ydl.prepare_filename(result)  # קבל את שם הקובץ
+         ydl.download([url])  # הורד את הקובץ
+         return send_file(filename+".mp3", as_attachment=True)
     except:
         return jsonify("500")
         
+
 
 
     
