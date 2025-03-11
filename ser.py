@@ -45,10 +45,10 @@ def search():
 @app.route('/download', methods=['GET'])
 def download_video():
     print("download_video")
-    video_url = request.args.get('url')
-    if not video_url:
+    video_id = request.args.get('id')
+    if not video_id:
         return jsonify({"error": "Missing video URL"}), 400
-
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
     try:
         ydl_opts = {
             'format': 'bestaudio/best',
