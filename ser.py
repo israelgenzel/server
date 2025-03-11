@@ -55,28 +55,28 @@ def download():
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': output_file,
-        'postprocessors': [
-            {
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            },
-            {
-                'key': 'FFmpegMetadata',  # הוספת מטא-דאטה לקובץ ה-MP3
-                'add_metadata': True,
+        # 'postprocessors': [
+        #     {
+        #         'key': 'FFmpegExtractAudio',
+        #         'preferredcodec': 'mp3',
+        #         'preferredquality': '192',
+        #     },
+        #     {
+        #         'key': 'FFmpegMetadata',  # הוספת מטא-דאטה לקובץ ה-MP3
+        #         'add_metadata': True,
                 
                 
-            },
-            {
-                "key": "FFmpegThumbnailsConvertor",
-                "format": "jpg",
-                "when": "before_dl"
-            }
-        ],
-        'writethumbnail': True,  # הורדת תמונת קאבר
-        'embedthumbnail': True,   # הטמעת התמונה בקובץ
-        'addmetadata': True,      # הוספת מטא-דאטה
-        "ffmpeg-location": "./ffmpeg.exe",  # נתיב ל-FFmpeg
+        #     },
+        #     {
+        #         "key": "FFmpegThumbnailsConvertor",
+        #         "format": "jpg",
+        #         "when": "before_dl"
+        #     }
+        # ],
+        # 'writethumbnail': True,  # הורדת תמונת קאבר
+        # 'embedthumbnail': True,   # הטמעת התמונה בקובץ
+        # 'addmetadata': True,      # הוספת מטא-דאטה
+        # "ffmpeg-location": "./ffmpeg.exe",  # נתיב ל-FFmpeg
     }
     url = f"https://www.youtube.com/watch?v={id}"
     try:
@@ -88,14 +88,18 @@ def download():
 
 
     
-    print(output_file)
-    add_cover(output_file +".mp3", output_file+ ".jpg")
-    os.remove(output_file+ ".jpg")
+    # print(output_file)
+    # add_cover(output_file +".mp3", output_file+ ".jpg")
+    # os.remove(output_file+ ".jpg")
     
-    if os.path.exists(output_file +".mp3"):
-        return send_file(output_file +".mp3", as_attachment=True)
-    else:
-        return jsonify("500")
+    for file in os.listdir(DOWNLOADS_FOLDER):
+        if file.startswith(filename + "."):  # בודק אם הקובץ מתחיל בשם הזה (ומופיעה נקודה לסיומת)
+          return send_file(file, as_attachment=True)  
+   
+    # if os.path.exists(output_file):
+    #     return send_file(output_file +".mp3", as_attachment=True)
+    # else:
+    return jsonify("500")
     
     # return jsonify({"message": "ההורדה הסתיימה בהצלחה!"})
 
