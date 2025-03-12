@@ -45,7 +45,7 @@ def search():
 @app.route('/download', methods=['GET'])
 def download_video():
 
-    print(os.listdir("/downloads"))
+    print(os.listdir("downloads"))
     print("download_video")
     video_id = request.args.get('id')
     if not video_id:
