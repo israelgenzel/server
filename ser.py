@@ -45,7 +45,7 @@ def search():
 @app.route('/download', methods=['GET'])
 def download_video():
 
-    print(os.getcwd("downloads"))
+    print(os.listdir("downloads"))
     print("download_video")
     video_id = request.args.get('id')
     if not video_id:
@@ -83,7 +83,7 @@ def download_video():
         #     except Exception as e:
         #         print(f"⚠️ שגיאה במחיקה: {e}")
         #     return response
-
+        print (filename,downloaded_files[0])
         return send_file(filename, as_attachment=True,download_name=downloaded_files[0])
 
     except Exception as e:
