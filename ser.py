@@ -72,19 +72,19 @@ def download_video():
         print(f"✅ הורדה הושלמה: {downloaded_files[0]}")
         filename = os.path.join(DOWNLOAD_FOLDER, downloaded_files[0])
 
-        # מחיקת הקובץ אחרי שליחה
-        @after_this_request
-        def cleanup(response):
-            try:
-                if os.path.exists(filename):
-                    time.sleep(1)  # חכה שנייה לוודא שהשליחה הסתיימה
-                    os.remove(filename)
-                    print(f"🗑️ קובץ נמחק: {filename}")
-            except Exception as e:
-                print(f"⚠️ שגיאה במחיקה: {e}")
-            return response
+        # # מחיקת הקובץ אחרי שליחה
+        # @after_this_request
+        # def cleanup(response):
+        #     try:
+        #         if os.path.exists(filename):
+        #             time.sleep(1)  # חכה שנייה לוודא שהשליחה הסתיימה
+        #             os.remove(filename)
+        #             print(f"🗑️ קובץ נמחק: {filename}")
+        #     except Exception as e:
+        #         print(f"⚠️ שגיאה במחיקה: {e}")
+        #     return response
 
-        return send_file(filename, as_attachment=True)
+        return send_file(filename, as_attachment=True,download_name=downloaded_files[0])
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
