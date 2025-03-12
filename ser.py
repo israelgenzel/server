@@ -51,34 +51,12 @@ def download_video():
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     try:
         ydl_opts = {
-        #     'format': 'bestaudio/best',
-        #     'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
-        # }
-        'format': 'bestaudio/best',
-        'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
-        'postprocessors': [
-            {
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            },
-            {
-                'key': 'FFmpegMetadata',  # הוספת מטא-דאטה לקובץ ה-MP3
-                'add_metadata': True,
-                
-                
-            },
-            {
-                "key": "FFmpegThumbnailsConvertor",
-                "format": "jpg",
-                "when": "before_dl"
-            }
-        ],
-        'writethumbnail': True,  # הורדת תמונת קאבר
-        'embedthumbnail': True,   # הטמעת התמונה בקובץ
-        'addmetadata': True,      # הוספת מטא-דאטה
-        "ffmpeg-location": "./ffmpeg.exe",  # נתיב ל-FFmpeg
-    }
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
+            'writethumbnail': False,  # הורדת תמונת קאבר
+            'embedthumbnail': False,   # הטמעת התמונה בקובץ
+        }
+      
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
